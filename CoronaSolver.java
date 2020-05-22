@@ -13,16 +13,21 @@ public class CoronaSolver {
 
 	static String currentLoc = "L";
 	
+	static String[] answer = new String[18];
+	
+	
 	public static void main (String[] args) throws IOException {
 		
 		//String currentLoc = getFirstDay();
 		
-		//System.out.println(dayLA(4));
-		//System.out.println(dayNY(4));
+		//System.out.println(dayLA(0));
+		//System.out.println(dayNY(0));
 		//System.out.println(getDays());
 		//System.out.println(getFlight());
 		//System.out.println(currentLoc);
-		System.out.println(compareDay(2));
+		//System.out.println(compareDay(3));
+		//System.out.println(list.get(1));
+		System.out.println(Arrays.toString(solver()));
 		
 		}
 	
@@ -39,7 +44,7 @@ public class CoronaSolver {
 		
 		int size = list.size()*2;
 		String[] newStringArr = new String[size];
-		
+		//System.out.println(list.get(1));
 		String[] stringArr = list.toArray(new String[0]);
 		int size2 = (stringArr.length * 2) - 3;
 		String[] newS = new String[size2];
@@ -81,7 +86,7 @@ public class CoronaSolver {
 			//System.out.println(LA[j]);
 			l++;
 		}
-		int correctDay = day - 1;
+		int correctDay = day;
 		return LA[correctDay];
 }
 	
@@ -89,7 +94,7 @@ public class CoronaSolver {
 	
 	public static String dayNY(int day) throws IOException
 	{
-		/*
+		
 		BufferedReader in = new BufferedReader(new FileReader("deaths.txt"));
 		String str2;
 
@@ -97,7 +102,7 @@ public class CoronaSolver {
 		while((str2 = in.readLine()) != null){
 		    list.add(str2);
 		}
-		*/
+		
 		int size = list.size()*2;
 		String[] newStringArr = new String[size];
 		
@@ -142,12 +147,21 @@ public class CoronaSolver {
 			//System.out.println(LA[j]);
 			l++;
 		}
-		int correctDay = day - 1;
+		int correctDay = day;
 		return NY[correctDay];
 	}
 	
-	public static int getDays()
+	public static int getDays() throws IOException
 	{
+		
+		BufferedReader in = new BufferedReader(new FileReader("deaths.txt"));
+		String str;
+
+		
+		while((str = in.readLine()) != null){
+		    list.add(str);
+		}
+		
 		String dayString;
 		dayString = list.get(0);
 		int days =Integer.parseInt(dayString);  
@@ -197,10 +211,124 @@ public class CoronaSolver {
 		}
 		else
 		{
+			if (day == 0)
+			{
+				
+				compareDayReverse(day+1);
+				return currentLoc;
+			}
+			compareDay(day-1);
 			return currentLoc;
 		}
 		
 	}
 	
+	public static String compareDayReverse(int day) throws NumberFormatException, IOException
+	{
+		int NY = Integer.parseInt(dayNY(day));
+		int LA = Integer.parseInt(dayLA(day));
+		int flight = getFlight();
+		if (NY + flight < LA)
+		{
+			currentLoc = "N";
+			return currentLoc;
+		}
+		else if (LA + flight < NY)
+		{
+			currentLoc = "L";
+			return currentLoc;
+		}
+		else
+		{
+			compareDayReverse(day+1);
+			return currentLoc;
+		}
+		
+	}
 	
+	public static boolean comparePrevLA(int day) throws NumberFormatException, IOException
+	{
+		int flight = getFlight();
+		int NY = Integer.parseInt(dayNY(day));
+		int LA = Integer.parseInt(dayLA(day));
+		
+		if (NY+flight < LA)
+		{
+			currentLoc = "N";
+			return true;
+		}
+		else if (LA < NY)
+		{
+			currentLoc = "L";
+			return false;
+		}
+		else
+		{
+			comparePrevLA(day-1);
+		}
+		return true;
+	}
+	
+	public static boolean comparePrevNY(int day) throws NumberFormatException, IOException
+	{
+		int flight = getFlight();
+		int NY = Integer.parseInt(dayNY(day));
+		int LA = Integer.parseInt(dayLA(day));
+		
+		if (LA+flight < NY)
+		{
+			currentLoc = "L";
+			return true;
+		}
+		else if (NY< LA)
+		{
+			currentLoc = "N";
+			return false;
+		}
+		else
+		{
+			comparePrevNY(day-1);
+		}
+		
+		return true;
+	}
+	
+	public static String[] solver() throws NumberFormatException, IOException
+	{
+		int days = getDays();
+		int flight = getFlight();
+		String lastLoc = compareDay(days-1);
+		answer[days-1] = lastLoc;
+		currentLoc = lastLoc;
+		//System.out.println(lastLoc);
+		for (int i = days-2; i > 0; i--)
+		{
+			if (currentLoc.equalsIgnoreCase("L"))
+			{
+				if (comparePrevLA(i))
+				{
+					answer[i] = currentLoc;
+				}
+				else
+				{
+					answer[i] = currentLoc;
+				}
+			}
+			else if (currentLoc.equalsIgnoreCase("N"))
+			{
+				//System.out.println("here");
+				if (comparePrevNY(i))
+				{
+					
+					answer[i] = currentLoc;
+				}
+				else
+				{
+					answer[i] = currentLoc;
+				}
+			}
+		}
+		answer[0] = compareDay(0);
+		return answer;
+	}
 }
